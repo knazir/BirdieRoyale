@@ -4,6 +4,7 @@
 #include "BaseCharacter.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 
 // Sets default values
@@ -70,6 +71,9 @@ void ABaseCharacter::StartSliding()
 		return;
 	}
 
+	LastSlideStartedTs = UGameplayStatics::GetRealTimeSeconds(this);
+	UE_LOG(LogTemp, Warning, TEXT("StartSliding: %f"), LastSlideStartedTs);	
+
 	bIsSliding = true;
 	UCharacterMovementComponent* Movement = GetCharacterMovement();
 	Movement->MaxWalkSpeed = PostSlideSpeed;
@@ -85,9 +89,23 @@ void ABaseCharacter::StopSliding()
 	{
 		return;
 	}
-	
-	FTimerHandle TimerHandle;
-	GetWorldTimerManager().SetTimer(TimerHandle, this, &ABaseCharacter::ResetSliding, SlideExitDelay, false);
+
+	float CurrentTime = UGameplayStatics::GetRealTimeSeconds(this);
+	UE_LOG(LogTemp, Warning, TEXT("StopSliding: %f"), CurrentTime);
+	UE_LOG(LogTemp, Warning, TEXT("TIME DIFF: %f"), CurrentTime - LastSlideStartedTs);
+	UE_LOG(LogTemp, Warning, TEXT("SlideExitDelay: %f"), SlideExitDelay);
+
+	if (CurrentTime - LastSlideStartedTs < SlideExitDelay)
+	{
+		FTimerHandle SlideTimerHandle;
+		GetWorldTimerManager().SetTimer(SlideTimerHandle, this, &ABaseCharacter::ResetSliding, SlideExitDelay, false);
+		UE_LOG(LogTemp, Warning, TEXT("Timer set"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ResetSliding"));
+		ResetSliding();
+	}
 }
 
 void ABaseCharacter::ResetSliding()
