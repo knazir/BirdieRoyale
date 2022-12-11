@@ -39,6 +39,12 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction(TEXT("Slide"), EInputEvent::IE_Released, this, &ABaseCharacter::StopSliding);
 }
 
+bool ABaseCharacter::IsSlideBoostAvailable() const
+{
+	float CurrentTime = UGameplayStatics::GetRealTimeSeconds(this);
+	return CurrentTime >= NextSlideBoostAvailableTs;
+}
+
 bool ABaseCharacter::IsSliding() const
 {
 	return bIsSliding;
@@ -71,16 +77,20 @@ void ABaseCharacter::StartSliding()
 		return;
 	}
 
-	LastSlideStartedTs = UGameplayStatics::GetRealTimeSeconds(this);
-	UE_LOG(LogTemp, Warning, TEXT("StartSliding: %f"), LastSlideStartedTs);	
-
+	// Put the character into sliding state regardless of if boost was available
 	bIsSliding = true;
+	LastSlideStartedTs = UGameplayStatics::GetRealTimeSeconds(this);
 	UCharacterMovementComponent* Movement = GetCharacterMovement();
 	Movement->MaxWalkSpeed = PostSlideSpeed;
 	Movement->GroundFriction = SlideFriction;
 
-	FVector Boost = GetActorForwardVector() * SlideBoostStrength;
-	Movement->AddImpulse(GetActorForwardVector() + Boost, true);
+	// Sliding is independent of the boost, which has a cooldown
+	if (IsSlideBoostAvailable())
+	{
+		FVector Boost = GetActorForwardVector() * SlideBoostStrength;
+		Movement->AddImpulse(GetActorForwardVector() + Boost, true);
+		NextSlideBoostAvailableTs = LastSlideStartedTs + SlideBoostCooldown;
+	}
 }
 
 void ABaseCharacter::StopSliding()
@@ -91,19 +101,13 @@ void ABaseCharacter::StopSliding()
 	}
 
 	float CurrentTime = UGameplayStatics::GetRealTimeSeconds(this);
-	UE_LOG(LogTemp, Warning, TEXT("StopSliding: %f"), CurrentTime);
-	UE_LOG(LogTemp, Warning, TEXT("TIME DIFF: %f"), CurrentTime - LastSlideStartedTs);
-	UE_LOG(LogTemp, Warning, TEXT("SlideExitDelay: %f"), SlideExitDelay);
-
 	if (CurrentTime - LastSlideStartedTs < SlideExitDelay)
 	{
 		FTimerHandle SlideTimerHandle;
 		GetWorldTimerManager().SetTimer(SlideTimerHandle, this, &ABaseCharacter::ResetSliding, SlideExitDelay, false);
-		UE_LOG(LogTemp, Warning, TEXT("Timer set"));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ResetSliding"));
 		ResetSliding();
 	}
 }

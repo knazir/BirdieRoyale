@@ -20,7 +20,8 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	bool IsSlideBoostAvailable() const;
+	
 	UFUNCTION(BlueprintPure)
 	bool IsSliding() const;
 
@@ -36,6 +37,10 @@ private:
 	float DefaultMaxWalkSpeed = 0.0f;
 	float DefaultGroundFriction = 0.0f;
 	float LastSlideStartedTs = 0.0f;
+	float NextSlideBoostAvailableTs = 0.0f;
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float SlideBoostCooldown = 2.0f;
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float SlideBoostStrength = 1200.0f;
