@@ -30,5 +30,23 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ABaseCharacter::MoveForward);
+	PlayerInputComponent->BindAxis(TEXT("TurnRight"), this, &ABaseCharacter::TurnRight);
+	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ABaseCharacter::Jump);
+}
+
+void ABaseCharacter::MoveForward(float AxisValue)
+{
+	AddMovementInput(GetActorForwardVector() * AxisValue);
+}
+
+void ABaseCharacter::TurnRight(float AxisValue)
+{
+	AddControllerYawInput(AxisValue);
+}
+
+void ABaseCharacter::Jump()
+{
+	ACharacter::Jump();
 }
 
