@@ -21,24 +21,22 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	bool IsSlideBoostAvailable() const;
-	
-	UFUNCTION(BlueprintPure)
-	bool IsSliding() const;
+
 
 private:
-	void MoveForward(float AxisValue);
 	void TurnRight(float AxisValue);
 	void Jump();
 	void StartSliding();
 	void StopSliding();
 	void ResetSliding();
-
-	bool bIsSliding = false;
+	
 	float DefaultMaxWalkSpeed = 0.0f;
 	float DefaultGroundFriction = 0.0f;
-	float DefaultInitialPushForceFactor = 0.0f;
 	float LastSlideStartedTs = 0.0f;
 	float NextSlideBoostAvailableTs = 0.0f;
+
+	UPROPERTY(BluePrintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool bIsSliding = false;
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float SlideBoostCooldown = 2.0f;

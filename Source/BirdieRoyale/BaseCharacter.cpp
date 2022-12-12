@@ -22,7 +22,6 @@ void ABaseCharacter::BeginPlay()
 	UCharacterMovementComponent* Movement = GetCharacterMovement();
 	DefaultMaxWalkSpeed = Movement->MaxWalkSpeed;
 	DefaultGroundFriction = Movement->GroundFriction;
-	DefaultInitialPushForceFactor = Movement->InitialPushForceFactor;
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
@@ -33,8 +32,7 @@ void ABaseCharacter::Tick(float DeltaTime)
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ABaseCharacter::MoveForward);
+	
 	PlayerInputComponent->BindAxis(TEXT("TurnRight"), this, &ABaseCharacter::TurnRight);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ABaseCharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Slide"), EInputEvent::IE_Pressed, this, &ABaseCharacter::StartSliding);
@@ -45,16 +43,6 @@ bool ABaseCharacter::IsSlideBoostAvailable() const
 {
 	float CurrentTime = UGameplayStatics::GetRealTimeSeconds(this);
 	return CurrentTime >= NextSlideBoostAvailableTs;
-}
-
-bool ABaseCharacter::IsSliding() const
-{
-	return bIsSliding;
-}
-
-void ABaseCharacter::MoveForward(float AxisValue)
-{
-	AddMovementInput(GetActorForwardVector() * AxisValue);
 }
 
 void ABaseCharacter::TurnRight(float AxisValue)
