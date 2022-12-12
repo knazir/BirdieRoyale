@@ -17,11 +17,6 @@ ABaseCharacter::ABaseCharacter()
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	// Save initial settings to restore after actions
-	UCharacterMovementComponent* Movement = GetCharacterMovement();
-	DefaultMaxWalkSpeed = Movement->MaxWalkSpeed;
-	DefaultGroundFriction = Movement->GroundFriction;
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
@@ -32,80 +27,4 @@ void ABaseCharacter::Tick(float DeltaTime)
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-	
-	PlayerInputComponent->BindAxis(TEXT("TurnRight"), this, &ABaseCharacter::TurnRight);
-	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ABaseCharacter::Jump);
-	PlayerInputComponent->BindAction(TEXT("Slide"), EInputEvent::IE_Pressed, this, &ABaseCharacter::StartSliding);
-	PlayerInputComponent->BindAction(TEXT("Slide"), EInputEvent::IE_Released, this, &ABaseCharacter::StopSliding);
-}
-
-bool ABaseCharacter::IsSlideBoostAvailable() const
-{
-	float CurrentTime = UGameplayStatics::GetRealTimeSeconds(this);
-	return CurrentTime >= NextSlideBoostAvailableTs;
-}
-
-void ABaseCharacter::TurnRight(float AxisValue)
-{
-	float TurnValue = AxisValue;
-	if (bIsSliding)
-	{
-		TurnValue *= SlideTurnDampener;
-	}
-	AddControllerYawInput(TurnValue);
-}
-
-void ABaseCharacter::Jump()
-{
-	ACharacter::Jump();
-}
-
-void ABaseCharacter::StartSliding()
-{
-	if (bIsSliding)
-	{
-		return;
-	}
-
-	// Put the character into sliding state regardless of if boost was available
-	bIsSliding = true;
-	LastSlideStartedTs = UGameplayStatics::GetRealTimeSeconds(this);
-	UCharacterMovementComponent* Movement = GetCharacterMovement();
-	Movement->MaxWalkSpeed = PostSlideSpeed;
-	Movement->GroundFriction = SlideFriction;
-
-	// Sliding is independent of the boost, which has a cooldown
-	if (IsSlideBoostAvailable())
-	{
-		FVector Boost = GetActorForwardVector() * SlideBoostStrength;
-		Movement->AddImpulse(GetActorForwardVector() + Boost, true);
-		NextSlideBoostAvailableTs = LastSlideStartedTs + SlideBoostCooldown;
-	}
-}
-
-void ABaseCharacter::StopSliding()
-{
-	if (!bIsSliding)
-	{
-		return;
-	}
-
-	float CurrentTime = UGameplayStatics::GetRealTimeSeconds(this);
-	if (CurrentTime - LastSlideStartedTs < SlideExitDelay)
-	{
-		FTimerHandle SlideTimerHandle;
-		GetWorldTimerManager().SetTimer(SlideTimerHandle, this, &ABaseCharacter::ResetSliding, SlideExitDelay, false);
-	}
-	else
-	{
-		ResetSliding();
-	}
-}
-
-void ABaseCharacter::ResetSliding()
-{
-	bIsSliding = false;
-	UCharacterMovementComponent* Movement = GetCharacterMovement();
-	Movement->MaxWalkSpeed = DefaultMaxWalkSpeed;
-	Movement->GroundFriction = DefaultGroundFriction;
 }

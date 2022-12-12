@@ -20,24 +20,22 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	bool IsSlideBoostAvailable() const;
 
 
 private:
-	void TurnRight(float AxisValue);
-	void Jump();
-	void StartSliding();
-	void StopSliding();
-	void ResetSliding();
+	// Blueprint Only
 	
-	float DefaultMaxWalkSpeed = 0.0f;
-	float DefaultGroundFriction = 0.0f;
-	float LastSlideStartedTs = 0.0f;
-	float NextSlideBoostAvailableTs = 0.0f;
-
 	UPROPERTY(BluePrintReadWrite, meta = (AllowPrivateAccess = "true"))
 	bool bIsSliding = false;
 
+	UPROPERTY(BluePrintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float NextSlideBoostAvailableTs = 0.0f;
+
+	UPROPERTY(BluePrintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float LastSlideStartedTs = 0.0f;
+
+	// Configurable
+	
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float SlideBoostCooldown = 2.0f;
 
@@ -46,15 +44,15 @@ private:
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float VelocityInitialPushForceMultiplier = 150.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float SlideExitDelay = 1.0f;
 	
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float SlideTurnDampener = 0.25f;
 
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float SlideFriction = 0.5f;
-
-	UPROPERTY(EditAnywhere, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-	float SlideExitDelay = 1.0f;
 	
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float PostSlideSpeed = 180.0;
