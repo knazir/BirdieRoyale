@@ -23,16 +23,11 @@ void ABaseCharacter::BeginPlay()
 	DefaultMaxWalkSpeed = Movement->MaxWalkSpeed;
 	DefaultGroundFriction = Movement->GroundFriction;
 	DefaultInitialPushForceFactor = Movement->InitialPushForceFactor;
-
-	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &ABaseCharacter::OnComponentHit);
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	float Force = GetVelocity().Size();
-	GetCharacterMovement()->InitialPushForceFactor = Force * VelocityInitialPushForceMultiplier;
 }
 
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

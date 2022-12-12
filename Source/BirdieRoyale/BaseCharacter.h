@@ -33,9 +33,6 @@ private:
 	void StopSliding();
 	void ResetSliding();
 
-	UFUNCTION()
-	void OnComponentHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
 	bool bIsSliding = false;
 	float DefaultMaxWalkSpeed = 0.0f;
 	float DefaultGroundFriction = 0.0f;
