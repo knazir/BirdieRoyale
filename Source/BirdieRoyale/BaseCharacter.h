@@ -36,14 +36,19 @@ private:
 	bool bIsSliding = false;
 	float DefaultMaxWalkSpeed = 0.0f;
 	float DefaultGroundFriction = 0.0f;
+	float DefaultInitialPushForceFactor = 0.0f;
 	float LastSlideStartedTs = 0.0f;
 	float NextSlideBoostAvailableTs = 0.0f;
+	float PreviousTickSpeed = 0.0f;
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float SlideBoostCooldown = 2.0f;
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float SlideBoostStrength = 1200.0f;
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float InitialPushForceMultiplier = 2.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float SlideTurnDampener = 0.25f;

@@ -3,6 +3,7 @@
 
 #include "BaseCharacter.h"
 
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
@@ -21,11 +22,20 @@ void ABaseCharacter::BeginPlay()
 	UCharacterMovementComponent* Movement = GetCharacterMovement();
 	DefaultMaxWalkSpeed = Movement->MaxWalkSpeed;
 	DefaultGroundFriction = Movement->GroundFriction;
+	DefaultInitialPushForceFactor = Movement->InitialPushForceFactor;
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	float Speed = GetVelocity().Size();
+	float ActualAccelerationMag = FMath::Abs((Speed - PreviousTickSpeed) / DeltaTime);
+	PreviousTickSpeed = Speed;
+	UCharacterMovementComponent* Movement = GetCharacterMovement();
+	float Force = ActualAccelerationMag * GetMesh()->GetMass()* InitialPushForceMultiplier;
+
+	Movement->InitialPushForceFactor = FMath::Min(Force, Movement->MaxTouchForce);
 }
 
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
