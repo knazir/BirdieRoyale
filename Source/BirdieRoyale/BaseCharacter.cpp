@@ -23,19 +23,13 @@ void ABaseCharacter::BeginPlay()
 	DefaultMaxWalkSpeed = Movement->MaxWalkSpeed;
 	DefaultGroundFriction = Movement->GroundFriction;
 	DefaultInitialPushForceFactor = Movement->InitialPushForceFactor;
+
+	GetCapsuleComponent()->OnComponentHit.AddDynamic(this, &ABaseCharacter::OnComponentHit);
 }
 
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	float Speed = GetVelocity().Size();
-	float ActualAccelerationMag = FMath::Abs((Speed - PreviousTickSpeed) / DeltaTime);
-	PreviousTickSpeed = Speed;
-	UCharacterMovementComponent* Movement = GetCharacterMovement();
-	float Force = ActualAccelerationMag * GetMesh()->GetMass()* InitialPushForceMultiplier;
-
-	Movement->InitialPushForceFactor = FMath::Min(Force, Movement->MaxTouchForce);
 }
 
 void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -100,6 +94,7 @@ void ABaseCharacter::StartSliding()
 		FVector Boost = GetActorForwardVector() * SlideBoostStrength;
 		Movement->AddImpulse(GetActorForwardVector() + Boost, true);
 		NextSlideBoostAvailableTs = LastSlideStartedTs + SlideBoostCooldown;
+		Movement->InitialPushForceFactor *= SlideForceMultiplier;
 	}
 }
 
@@ -128,5 +123,19 @@ void ABaseCharacter::ResetSliding()
 	UCharacterMovementComponent* Movement = GetCharacterMovement();
 	Movement->MaxWalkSpeed = DefaultMaxWalkSpeed;
 	Movement->GroundFriction = DefaultGroundFriction;
+	Movement->InitialPushForceFactor = DefaultInitialPushForceFactor;
+}
+
+void ABaseCharacter::OnComponentHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
+									FVector NormalImpulse, const FHitResult& Hit)
+{
+	TArray<FName> OtherActorTags = OtherActor->Tags;
+	if (OtherActorTags.Contains(TEXT("Terrain")))
+	{
+		return;
+	}
+	
+	// If we hit something that is not terrain, remove the initial boosted sliding force
+	GetCharacterMovement()->InitialPushForceFactor = DefaultInitialPushForceFactor;
 }
 
