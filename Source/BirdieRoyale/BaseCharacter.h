@@ -50,10 +50,7 @@ private:
 	float SlideBoostStrength = 1200.0f;
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-	float SlideForceMultiplier = 3.0f;
-
-	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Movement", meta = (AllowPrivateAccess = "true"))
-	float PostSlideForceMultiplier = 0.5f;
+	float VelocityInitialPushForceMultiplier = 150.0f;
 	
 	UPROPERTY(EditAnywhere, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float SlideTurnDampener = 0.25f;
