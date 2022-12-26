@@ -19,6 +19,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LoadMainMenu();
 
+	UFUNCTION(BlueprintCallable)
+	void CloseMainMenu();
+
 	UFUNCTION(Exec)
 	virtual void Host() override;
 

@@ -51,7 +51,10 @@ void UMainMenu::SetMenuInterface(IMenuInterface* Interface)
 
 void UMainMenu::TearDown()
 {
-	RemoveFromViewport();
+	if (IsInViewport())
+	{
+		RemoveFromViewport();
+	}
 
 	UWorld* World = GetWorld();
 	if (World == nullptr)

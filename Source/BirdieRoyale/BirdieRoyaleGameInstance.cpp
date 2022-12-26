@@ -40,13 +40,17 @@ void UBirdieRoyaleGameInstance::LoadMainMenu()
 	MainMenu->SetMenuInterface(this);
 }
 
-void UBirdieRoyaleGameInstance::Host()
+void UBirdieRoyaleGameInstance::CloseMainMenu()
 {
 	if (MainMenu != nullptr)
 	{
 		MainMenu->TearDown();
+		MainMenu = nullptr;
 	}
+}
 
+void UBirdieRoyaleGameInstance::Host()
+{
 	UEngine* Engine = GetEngine();
 	if (Engine == nullptr)
 	{
