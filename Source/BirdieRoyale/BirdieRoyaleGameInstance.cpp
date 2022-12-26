@@ -3,13 +3,50 @@
 
 #include "BirdieRoyaleGameInstance.h"
 
+#include "UI/MainMenu.h"
+
+#include "Engine/Engine.h"
+#include "Runtime/UMG/Public/Blueprint/UserWidget.h"
+#include "UObject/ConstructorHelpers.h"
+
+UBirdieRoyaleGameInstance::UBirdieRoyaleGameInstance(const FObjectInitializer& ObjectInitializer)
+{
+	ConstructorHelpers::FClassFinder<UMainMenu> MenuBPClass(TEXT("/Game/Blueprints/UI/WBP_MainMenu"));
+	if (MenuBPClass.Class != nullptr)
+	{
+		MenuClass = MenuBPClass.Class;
+	}
+}
+
 void UBirdieRoyaleGameInstance::Init()
 {
-	
+	Super::Init();
+}
+
+void UBirdieRoyaleGameInstance::LoadMainMenu()
+{
+	if (MenuClass == nullptr)
+	{
+		return;
+	}
+
+	MainMenu = CreateWidget<UMainMenu>(this, MenuClass);
+	if (MainMenu == nullptr)
+	{
+		return;
+	}
+
+	MainMenu->Setup();
+	MainMenu->SetMenuInterface(this);
 }
 
 void UBirdieRoyaleGameInstance::Host()
 {
+	if (MainMenu != nullptr)
+	{
+		MainMenu->TearDown();
+	}
+
 	UEngine* Engine = GetEngine();
 	if (Engine == nullptr)
 	{
@@ -24,7 +61,7 @@ void UBirdieRoyaleGameInstance::Host()
 		return;
 	}
 
-	World->ServerTravel("/Game/Levels/Test?listen");
+	World->ServerTravel("/Game/Levels/Lobby?listen");
 }
 
 void UBirdieRoyaleGameInstance::Join(const FString& Address)
