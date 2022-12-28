@@ -66,12 +66,14 @@ void UBirdieRoyaleGameInstance::Host()
 	}
 
 	World->ServerTravel("/Game/Levels/Lobby?listen");
+
+	CloseMainMenu();
 }
 
 void UBirdieRoyaleGameInstance::Join(const FString& Address)
 {
 	UEngine* Engine = GetEngine();
-	if (Engine == nullptr)
+	if (!ensure(Engine != nullptr))
 	{
 		return;
 	}
@@ -79,13 +81,13 @@ void UBirdieRoyaleGameInstance::Join(const FString& Address)
 	Engine->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, TEXT("Joining Game @ " + Address));
 
 	UWorld* World = GetWorld();
-	if (World == nullptr)
+	if (!ensure(World != nullptr))
 	{
 		return;
 	}
 
 	APlayerController* PlayerController = World->GetFirstPlayerController();
-	if (PlayerController == nullptr)
+	if (!ensure(PlayerController != nullptr))
 	{
 		return;
 	}

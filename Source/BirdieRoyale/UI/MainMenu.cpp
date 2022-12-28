@@ -3,6 +3,8 @@
 #include "MainMenu.h"
 
 #include "Components/Button.h"
+#include "Components/EditableText.h"
+#include "Components/WidgetSwitcher.h"
 
 bool UMainMenu::Initialize()
 {
@@ -11,14 +13,20 @@ bool UMainMenu::Initialize()
 
 	
 
-	if (HostButton == nullptr || JoinButton == nullptr)
+	if (!ensure(HostButton != nullptr) ||
+		!ensure(JoinButton != nullptr) || 
+		!ensure(JoinBackButton != nullptr) ||
+		!ensure(MainMenuSwitcher != nullptr) ||
+		!ensure(ConnectButton != nullptr))
 	{
 		return false;
 	}
 
 	HostButton->OnClicked.AddDynamic(this, &UMainMenu::HostServer);
-	JoinButton->OnClicked.AddDynamic(this, &UMainMenu::JoinServer);
-
+	JoinButton->OnClicked.AddDynamic(this, &UMainMenu::OpenJoinMenu);
+	JoinBackButton->OnClicked.AddDynamic(this, &UMainMenu::GoToMainMenu);
+	ConnectButton->OnClicked.AddDynamic(this, &UMainMenu::JoinServer);
+	
 	return true;
 }
 
@@ -51,21 +59,21 @@ void UMainMenu::SetMenuInterface(IMenuInterface* Interface)
 
 void UMainMenu::TearDown()
 {
-	if (IsInViewport())
-	{
-		RemoveFromViewport();
-	}
-
 	UWorld* World = GetWorld();
-	if (World == nullptr)
+	if (!ensure(World != nullptr))
 	{
 		return;
 	}
 
 	APlayerController* PlayerController = World->GetFirstPlayerController();
-	if (PlayerController == nullptr)
+	if (!ensure(PlayerController != nullptr))
 	{
 		return;
+	}
+
+	if (IsInViewport())
+	{
+		RemoveFromViewport();
 	}
 
 	FInputModeGameOnly InputModeData;
@@ -83,5 +91,38 @@ void UMainMenu::HostServer()
 
 void UMainMenu::JoinServer()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Join Server"));
+	if (MenuInterface == nullptr || !ensure(IPAddressField != nullptr))
+	{
+		return;
+	}
+
+	const FString& Address = IPAddressField->GetText().ToString();
+	UE_LOG(LogTemp, Warning, TEXT("Joining %s"), *Address);
+
+	if (MenuInterface != nullptr)
+	{
+		MenuInterface->Join(Address);
+	}
+}
+
+void UMainMenu::OpenJoinMenu()
+{
+	if (!ensure(MainMenuSwitcher != nullptr) || !ensure(JoinMenu != nullptr))
+	{
+		return;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Open Join Menu"));
+
+	MainMenuSwitcher->SetActiveWidget(JoinMenu);
+}
+
+void UMainMenu::GoToMainMenu()
+{
+	if (!ensure(MainMenuSwitcher != nullptr) || !ensure(MainMenu != nullptr))
+	{
+		return;
+	}
+
+	MainMenuSwitcher->SetActiveWidget(MainMenu);
 }

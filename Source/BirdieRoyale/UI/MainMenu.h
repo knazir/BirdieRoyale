@@ -25,16 +25,40 @@ protected:
 
 private:
 	UPROPERTY(meta = (BindWidget))
+	class UWidget* MainMenu;
+	
+	UPROPERTY(meta = (BindWidget))
+	class UWidget* JoinMenu;
+
+	UPROPERTY(meta = (BindWidget))
 	class UButton* HostButton;
 	
 	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* JoinBackButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* ConnectButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UWidgetSwitcher* MainMenuSwitcher;
+	
+	UPROPERTY(meta = (BindWidget))
+	class UEditableText* IPAddressField;
 
 	UFUNCTION()
 	void HostServer();
 
 	UFUNCTION()
 	void JoinServer();
+
+	UFUNCTION()
+	void GoToMainMenu();
+
+	UFUNCTION()
+	void OpenJoinMenu();
 
 	IMenuInterface* MenuInterface;
 };
