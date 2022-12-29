@@ -9,9 +9,10 @@
 bool UMainMenu::Initialize()
 {
 	bool Success = Super::Initialize();
-	if (!Success) return false;
-
-	
+	if (!Success)
+	{
+		return false;
+	}
 
 	if (!ensure(HostButton != nullptr) ||
 		!ensure(JoinButton != nullptr) || 
