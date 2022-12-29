@@ -28,6 +28,7 @@ private:
 	void SetupActiveRagdoll();
 	bool CanSlide() const;
 	bool IsSlideBoostAvailable() const;
+	bool IsPauseMenuOpen() const;
 
 	// Event Handlers
 	UFUNCTION()
@@ -53,6 +54,9 @@ private:
 
 	UFUNCTION()
 	void ZoomCameraOut();
+
+	UFUNCTION()
+	void TryTogglePauseMenu();
 
 	// Components
 	class USpringArmComponent* SpringArm = nullptr;

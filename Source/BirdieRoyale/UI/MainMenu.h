@@ -24,6 +24,22 @@ protected:
 	virtual bool Initialize() override;
 
 private:
+	IMenuInterface* MenuInterface;
+
+	// Event Handlers
+	UFUNCTION()
+	void HostServer();
+
+	UFUNCTION()
+	void JoinServer();
+
+	UFUNCTION()
+	void GoToMainMenu();
+
+	UFUNCTION()
+	void OpenJoinMenu();
+
+	// Bound Widgets
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* MainMenuSwitcher;
 
@@ -47,18 +63,4 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* ConnectButton;
-
-	UFUNCTION()
-	void HostServer();
-
-	UFUNCTION()
-	void JoinServer();
-
-	UFUNCTION()
-	void GoToMainMenu();
-
-	UFUNCTION()
-	void OpenJoinMenu();
-
-	IMenuInterface* MenuInterface;
 };

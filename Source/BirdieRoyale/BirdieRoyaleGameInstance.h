@@ -15,6 +15,10 @@ class BIRDIEROYALE_API UBirdieRoyaleGameInstance : public UGameInstance, public 
 public:
 	UBirdieRoyaleGameInstance(const FObjectInitializer& ObjectInitializer);
 	virtual void Init() override;
+	
+	void TryTogglePauseMenu();
+	void ClosePauseMenu();
+	bool IsPauseMenuOpen() const;
 
 	UFUNCTION(BlueprintCallable)
 	void LoadMainMenu();
@@ -29,6 +33,9 @@ public:
 	virtual void Join(const FString& Address) override;
 
 private:
-	TSubclassOf<UUserWidget> MenuClass;
-	class UMainMenu* MainMenu;
+	TSubclassOf<UUserWidget> MainMenuClass;
+	class UMainMenu* MainMenu = nullptr;
+
+	TSubclassOf<UUserWidget> PauseMenuClass;
+	class UPauseMenu* PauseMenu = nullptr;
 };

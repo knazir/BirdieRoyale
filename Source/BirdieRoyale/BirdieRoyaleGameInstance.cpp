@@ -4,17 +4,25 @@
 #include "BirdieRoyaleGameInstance.h"
 
 #include "UI/MainMenu.h"
+#include "UI/PauseMenu.h"
 
 #include "Engine/Engine.h"
+#include "Kismet/GameplayStatics.h"
 #include "Runtime/UMG/Public/Blueprint/UserWidget.h"
 #include "UObject/ConstructorHelpers.h"
 
 UBirdieRoyaleGameInstance::UBirdieRoyaleGameInstance(const FObjectInitializer& ObjectInitializer)
 {
-	ConstructorHelpers::FClassFinder<UMainMenu> MenuBPClass(TEXT("/Game/Blueprints/UI/WBP_MainMenu"));
-	if (MenuBPClass.Class != nullptr)
+	ConstructorHelpers::FClassFinder<UMainMenu> MainMenuBPClass(TEXT("/Game/Blueprints/UI/WBP_MainMenu"));
+	if (ensure(MainMenuBPClass.Class != nullptr))
 	{
-		MenuClass = MenuBPClass.Class;
+		MainMenuClass = MainMenuBPClass.Class;
+	}
+
+	ConstructorHelpers::FClassFinder<UPauseMenu> PauseMenuBPClass(TEXT("/Game/Blueprints/UI/WBP_PauseMenu"));
+	if (ensure(PauseMenuBPClass.Class != nullptr))
+	{
+		PauseMenuClass = PauseMenuBPClass.Class;
 	}
 }
 
@@ -25,12 +33,7 @@ void UBirdieRoyaleGameInstance::Init()
 
 void UBirdieRoyaleGameInstance::LoadMainMenu()
 {
-	if (!ensure(MenuClass != nullptr))
-	{
-		return;
-	}
-
-	MainMenu = CreateWidget<UMainMenu>(this, MenuClass);
+	MainMenu = CreateWidget<UMainMenu>(this, MainMenuClass);
 	if (MainMenu == nullptr)
 	{
 		return;
@@ -40,6 +43,22 @@ void UBirdieRoyaleGameInstance::LoadMainMenu()
 	MainMenu->SetMenuInterface(this);
 }
 
+void UBirdieRoyaleGameInstance::TryTogglePauseMenu()
+{
+	if (PauseMenu == nullptr)
+	{
+		if (UGameplayStatics::GetCurrentLevelName(this) != TEXT("MainMenu"))
+		{
+			PauseMenu = CreateWidget<UPauseMenu>(this, PauseMenuClass);
+			PauseMenu->Setup();
+		}
+	}
+	else
+	{
+		ClosePauseMenu();
+	}
+}
+
 void UBirdieRoyaleGameInstance::CloseMainMenu()
 {
 	if (MainMenu != nullptr)
@@ -47,6 +66,20 @@ void UBirdieRoyaleGameInstance::CloseMainMenu()
 		MainMenu->TearDown();
 		MainMenu = nullptr;
 	}
+}
+
+void UBirdieRoyaleGameInstance::ClosePauseMenu()
+{
+	if (PauseMenu != nullptr)
+	{
+		PauseMenu->TearDown();
+		PauseMenu = nullptr;
+	}
+}
+
+bool UBirdieRoyaleGameInstance::IsPauseMenuOpen() const
+{
+	return PauseMenu != nullptr && PauseMenu->IsInViewport();
 }
 
 void UBirdieRoyaleGameInstance::Host()

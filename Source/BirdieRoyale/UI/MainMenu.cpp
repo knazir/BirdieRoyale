@@ -36,16 +36,7 @@ void UMainMenu::Setup()
 	AddToViewport();
 
 	UWorld* World = GetWorld();
-	if (!ensure(World != nullptr))
-	{
-		return;
-	}
-
 	APlayerController* PlayerController = World->GetFirstPlayerController();
-	if (!ensure(PlayerController != nullptr))
-	{
-		return;
-	}
 
 	FInputModeUIOnly InputModeData;
 	InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
@@ -61,16 +52,7 @@ void UMainMenu::SetMenuInterface(IMenuInterface* Interface)
 void UMainMenu::TearDown()
 {
 	UWorld* World = GetWorld();
-	if (!ensure(World != nullptr))
-	{
-		return;
-	}
-
 	APlayerController* PlayerController = World->GetFirstPlayerController();
-	if (!ensure(PlayerController != nullptr))
-	{
-		return;
-	}
 
 	if (IsInViewport())
 	{
@@ -84,47 +66,21 @@ void UMainMenu::TearDown()
 
 void UMainMenu::HostServer()
 {
-	if (!ensure(MenuInterface != nullptr))
-	{
-		return;
-	}
-	
 	MenuInterface->Host();
 }
 
 void UMainMenu::JoinServer()
 {
-	if (!ensure(MenuInterface != nullptr) || !ensure(IPAddressField != nullptr))
-	{
-		return;
-	}
 	const FString& Address = IPAddressField->GetText().ToString();
-	
-	if (!ensure(MenuInterface != nullptr))
-	{
-		return;
-	}
 	MenuInterface->Join(Address);
 }
 
 void UMainMenu::OpenJoinMenu()
 {
-	if (!ensure(MainMenuSwitcher != nullptr) || !ensure(JoinMenu != nullptr))
-	{
-		return;
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Open Join Menu"));
-
 	MainMenuSwitcher->SetActiveWidget(JoinMenu);
 }
 
 void UMainMenu::GoToMainMenu()
 {
-	if (!ensure(MainMenuSwitcher != nullptr) || !ensure(MainMenu != nullptr))
-	{
-		return;
-	}
-
 	MainMenuSwitcher->SetActiveWidget(MainMenu);
 }

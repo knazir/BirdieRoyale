@@ -3,6 +3,8 @@
 
 #include "BaseCharacter.h"
 
+#include "BirdieRoyaleGameInstance.h"
+
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -59,6 +61,8 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction(TEXT("Slide"), IE_Released, this, &ABaseCharacter::SlideStop);
 	PlayerInputComponent->BindAction(TEXT("ZoomIn"), IE_Pressed, this, &ABaseCharacter::ZoomCameraIn);
 	PlayerInputComponent->BindAction(TEXT("ZoomOut"), IE_Pressed, this, &ABaseCharacter::ZoomCameraOut);
+
+	PlayerInputComponent->BindAction(TEXT("Pause"), IE_Pressed, this, &ABaseCharacter::TryTogglePauseMenu);
 }
 
 void ABaseCharacter::SetupActiveRagdoll()
@@ -83,6 +87,12 @@ bool ABaseCharacter::IsSlideBoostAvailable() const
 	return GetWorld()->GetTimeSeconds() >= NextSlideBoostAvailableTs;
 }
 
+bool ABaseCharacter::IsPauseMenuOpen() const
+{
+	UBirdieRoyaleGameInstance* GameInstance = Cast<UBirdieRoyaleGameInstance>(GetGameInstance());
+	return GameInstance->IsPauseMenuOpen();
+}
+
 void ABaseCharacter::OnMeshHit(class UPrimitiveComponent* HitComponent, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
 	const float OtherActorSpeed = OtherActor->GetVelocity().Size();
@@ -93,12 +103,22 @@ void ABaseCharacter::OnMeshHit(class UPrimitiveComponent* HitComponent, class AA
 
 void ABaseCharacter::Move(float AxisValue)
 {
+	if (IsPauseMenuOpen())
+	{
+		return;
+	}
+
 	const FVector& Velocity = GetVelocity();
 	AddMovementInput(GetActorForwardVector(), AxisValue);
 }
 
 void ABaseCharacter::Turn(float AxisValue)
 {
+	if (IsPauseMenuOpen())
+	{
+		return;
+	}
+
 	if (bIsSliding)
 	{
 		AddControllerYawInput(AxisValue * SlideTurnDampening);
@@ -164,4 +184,10 @@ void ABaseCharacter::ZoomCameraIn()
 void ABaseCharacter::ZoomCameraOut()
 {
 	SpringArm->TargetArmLength = FMath::Clamp(SpringArm->TargetArmLength + ZoomStep, MinSpringArmLength, MaxSpringArmLength);
+}
+
+void ABaseCharacter::TryTogglePauseMenu()
+{
+	UBirdieRoyaleGameInstance* GameInstance = Cast<UBirdieRoyaleGameInstance>(GetGameInstance());
+	GameInstance->TryTogglePauseMenu();
 }
