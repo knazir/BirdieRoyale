@@ -30,6 +30,5 @@ public:
 
 private:
 	TSubclassOf<UUserWidget> MenuClass;
-	
 	class UMainMenu* MainMenu;
 };

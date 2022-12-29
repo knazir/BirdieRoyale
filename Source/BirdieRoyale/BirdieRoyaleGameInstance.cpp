@@ -25,7 +25,7 @@ void UBirdieRoyaleGameInstance::Init()
 
 void UBirdieRoyaleGameInstance::LoadMainMenu()
 {
-	if (MenuClass == nullptr)
+	if (!ensure(MenuClass != nullptr))
 	{
 		return;
 	}
@@ -52,7 +52,7 @@ void UBirdieRoyaleGameInstance::CloseMainMenu()
 void UBirdieRoyaleGameInstance::Host()
 {
 	UEngine* Engine = GetEngine();
-	if (Engine == nullptr)
+	if (!ensure(Engine != nullptr))
 	{
 		return;
 	}
@@ -60,14 +60,13 @@ void UBirdieRoyaleGameInstance::Host()
 	Engine->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, TEXT("Hosting Game"));
 
 	UWorld* World = GetWorld();
-	if (World == nullptr)
+	if (!ensure(World != nullptr))
 	{
 		return;
 	}
 
-	World->ServerTravel("/Game/Levels/Lobby?listen");
-
 	CloseMainMenu();
+	World->ServerTravel("/Game/Levels/Lobby?listen");
 }
 
 void UBirdieRoyaleGameInstance::Join(const FString& Address)
@@ -92,5 +91,6 @@ void UBirdieRoyaleGameInstance::Join(const FString& Address)
 		return;
 	}
 	
+	CloseMainMenu();
 	PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
 }

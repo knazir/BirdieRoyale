@@ -35,13 +35,13 @@ void UMainMenu::Setup()
 	AddToViewport();
 
 	UWorld* World = GetWorld();
-	if (World == nullptr)
+	if (!ensure(World != nullptr))
 	{
 		return;
 	}
 
 	APlayerController* PlayerController = World->GetFirstPlayerController();
-	if (PlayerController == nullptr)
+	if (!ensure(PlayerController != nullptr))
 	{
 		return;
 	}
@@ -83,26 +83,27 @@ void UMainMenu::TearDown()
 
 void UMainMenu::HostServer()
 {
-	if (MenuInterface != nullptr)
+	if (!ensure(MenuInterface != nullptr))
 	{
-		MenuInterface->Host();
+		return;
 	}
+	
+	MenuInterface->Host();
 }
 
 void UMainMenu::JoinServer()
 {
-	if (MenuInterface == nullptr || !ensure(IPAddressField != nullptr))
+	if (!ensure(MenuInterface != nullptr) || !ensure(IPAddressField != nullptr))
 	{
 		return;
 	}
-
 	const FString& Address = IPAddressField->GetText().ToString();
-	UE_LOG(LogTemp, Warning, TEXT("Joining %s"), *Address);
-
-	if (MenuInterface != nullptr)
+	
+	if (!ensure(MenuInterface != nullptr))
 	{
-		MenuInterface->Join(Address);
+		return;
 	}
+	MenuInterface->Join(Address);
 }
 
 void UMainMenu::OpenJoinMenu()
