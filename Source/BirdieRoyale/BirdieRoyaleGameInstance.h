@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "OnlineSubsystem.h"
 #include "UI/MenuInterface.h"
 #include "BirdieRoyaleGameInstance.generated.h"
 
@@ -38,4 +39,12 @@ private:
 
 	TSubclassOf<UUserWidget> PauseMenuClass;
 	class UPauseMenu* PauseMenu = nullptr;
+
+	IOnlineSessionPtr SessionInterface = nullptr;
+	TSharedPtr<class FOnlineSessionSearch> SessionSearch = nullptr;
+
+	void CreateNewSession();
+	void OnCreateSessionComplete(FName SessionName, bool Success);
+	void OnDestroySessionComplete(FName SessionName, bool Success);
+	void OnFindSessionsComplete(bool Success);
 };
