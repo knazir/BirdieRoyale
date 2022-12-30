@@ -16,9 +16,13 @@ class BIRDIEROYALE_API UMainMenu : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	UMainMenu(const FObjectInitializer& ObjectInitializer);
+
 	void Setup();
 	void SetMenuInterface(IMenuInterface* Interface);
 	void TearDown();
+	void SetSessionsList(TArray<FString> SessionNames);
+	void SetSelectedSessionIndex(uint32 Index);
 	
 protected:
 	virtual bool Initialize() override;
@@ -42,6 +46,9 @@ private:
 	UFUNCTION()
 	void QuitGame();
 
+	UFUNCTION()
+	void RefreshSessionsList();
+
 	// Bound Widgets
 	UPROPERTY(meta = (BindWidget))
 	class UWidgetSwitcher* MainMenuSwitcher;
@@ -62,11 +69,21 @@ private:
 	class UWidget* JoinMenu;
 	
 	UPROPERTY(meta = (BindWidget))
-	class UEditableText* IPAddressField;
+	class UPanelWidget* SessionList;
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* JoinBackButton;
 
 	UPROPERTY(meta = (BindWidget))
+	class UButton* RefreshButton;
+
+	UPROPERTY(meta = (BindWidget))
 	class UButton* ConnectButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UThrobber* LoadingThrobber;
+	
+	// Internals
+	TSubclassOf<UUserWidget> SessionListItemClass;
+	TOptional<uint32> SelectedSessionIndex;
 };

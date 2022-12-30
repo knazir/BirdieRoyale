@@ -6,6 +6,7 @@
 #include "Engine/GameInstance.h"
 #include "OnlineSubsystem.h"
 #include "UI/MenuInterface.h"
+#include "Interfaces/OnlineSessionInterface.h"
 #include "BirdieRoyaleGameInstance.generated.h"
 
 UCLASS()
@@ -27,11 +28,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void CloseMainMenu();
 
-	UFUNCTION(Exec)
 	virtual void Host() override;
-
-	UFUNCTION(Exec)
-	virtual void Join(const FString& Address) override;
+	virtual void Join(uint32 SessionIndex) override;
+	virtual void RefreshSessionsList() override;
 
 private:
 	TSubclassOf<UUserWidget> MainMenuClass;
@@ -47,4 +46,5 @@ private:
 	void OnCreateSessionComplete(FName SessionName, bool Success);
 	void OnDestroySessionComplete(FName SessionName, bool Success);
 	void OnFindSessionsComplete(bool Success);
+	void OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 };

@@ -7,7 +7,6 @@
 #include "UI/PauseMenu.h"
 
 #include "Engine/Engine.h"
-#include "Interfaces/OnlineSessionInterface.h"
 #include "Kismet/GameplayStatics.h"
 #include "OnlineSessionSettings.h"
 #include "Runtime/UMG/Public/Blueprint/UserWidget.h"
@@ -17,16 +16,16 @@ const static FName SESSION_NAME = TEXT("My Session");
 
 UBirdieRoyaleGameInstance::UBirdieRoyaleGameInstance(const FObjectInitializer& ObjectInitializer)
 {
-	ConstructorHelpers::FClassFinder<UMainMenu> MainMenuBPClass(TEXT("/Game/Blueprints/UI/WBP_MainMenu"));
-	if (ensure(MainMenuBPClass.Class != nullptr))
+	ConstructorHelpers::FObjectFinder<UClass> MainMenuBPClass(TEXT("/Game/Blueprints/UI/WBP_MainMenu.WBP_MainMenu_C"));
+	if (ensure(MainMenuBPClass.Object != nullptr))
 	{
-		MainMenuClass = MainMenuBPClass.Class;
+		MainMenuClass = MainMenuBPClass.Object;
 	}
 
-	ConstructorHelpers::FClassFinder<UPauseMenu> PauseMenuBPClass(TEXT("/Game/Blueprints/UI/WBP_PauseMenu"));
-	if (ensure(PauseMenuBPClass.Class != nullptr))
+	ConstructorHelpers::FObjectFinder<UClass> PauseMenuBPClass(TEXT("/Game/Blueprints/UI/WBP_PauseMenu.WBP_PauseMenu_C"));
+	if (ensure(PauseMenuBPClass.Object != nullptr))
 	{
-		PauseMenuClass = PauseMenuBPClass.Class;
+		PauseMenuClass = PauseMenuBPClass.Object;
 	}
 }
 
@@ -47,16 +46,7 @@ void UBirdieRoyaleGameInstance::Init()
 		SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UBirdieRoyaleGameInstance::OnCreateSessionComplete);
 		SessionInterface->OnDestroySessionCompleteDelegates.AddUObject(this, &UBirdieRoyaleGameInstance::OnDestroySessionComplete);
 		SessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &UBirdieRoyaleGameInstance::OnFindSessionsComplete);
-
-		SessionSearch = MakeShareable(new FOnlineSessionSearch());
-		if (SessionSearch.IsValid())
-		{
-			SessionSearch->bIsLanQuery = true;
-			SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
-			SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
-		}
-
-		//SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UBirdieRoyaleGameInstance::OnJoinSessionComplete);
+		SessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &UBirdieRoyaleGameInstance::OnJoinSessionComplete);
 	}
 }
 
@@ -151,6 +141,7 @@ void UBirdieRoyaleGameInstance::OnCreateSessionComplete(FName SessionName, bool 
 		return;
 	}
 
+	GetEngine()->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, TEXT("Created new session"));
 	UEngine* Engine = GetEngine();
 	if (!ensure(Engine != nullptr))
 	{
@@ -183,31 +174,65 @@ void UBirdieRoyaleGameInstance::OnDestroySessionComplete(FName SessionName, bool
 
 void UBirdieRoyaleGameInstance::OnFindSessionsComplete(bool Success)
 {
-	
+	FOnlineSessionSearch* SearchResults = SessionSearch.Get();
+	if (SearchResults == nullptr || MainMenu == nullptr)
+	{
+		return;
+	}
+
+	TArray<FString> SessionNames;
+	for (const FOnlineSessionSearchResult& Result : SearchResults->SearchResults)
+	{
+		SessionNames.Push(Result.GetSessionIdStr());
+	}
+	MainMenu->SetSessionsList(SessionNames);
 }
 
-void UBirdieRoyaleGameInstance::Join(const FString& Address)
+void UBirdieRoyaleGameInstance::OnJoinSessionComplete(FName SessionName, EOnJoinSessionCompleteResult::Type Result)
 {
-	UEngine* Engine = GetEngine();
-	if (!ensure(Engine != nullptr))
+	if (!SessionInterface.IsValid())
 	{
 		return;
 	}
 
-	Engine->AddOnScreenDebugMessage(0, 2.0f, FColor::Green, TEXT("Joining Game @ " + Address));
-
-	UWorld* World = GetWorld();
-	if (!ensure(World != nullptr))
+	FString Address;
+	if (!SessionInterface->GetResolvedConnectString(SessionName, Address))
 	{
+		GetEngine()->AddOnScreenDebugMessage(0, 2.0f, FColor::Red, TEXT("Could not get connection string for session"));
 		return;
 	}
 
-	APlayerController* PlayerController = World->GetFirstPlayerController();
+	APlayerController* PlayerController = GetFirstLocalPlayerController();
 	if (!ensure(PlayerController != nullptr))
 	{
 		return;
 	}
-	
-	CloseMainMenu();
+
 	PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
+}
+
+void UBirdieRoyaleGameInstance::Join(uint32 SessionIndex)
+{
+	if (!SessionInterface.IsValid() || !SessionSearch.IsValid())
+	{
+		return;
+	}
+
+	CloseMainMenu();
+	SessionInterface->JoinSession(0, SESSION_NAME, SessionSearch->SearchResults[SessionIndex]);
+}
+
+void UBirdieRoyaleGameInstance::RefreshSessionsList()
+{
+	if (SessionSearch == nullptr)
+	{
+		SessionSearch = MakeShareable(new FOnlineSessionSearch());
+	}
+
+	if (SessionSearch.IsValid())
+	{
+		SessionSearch->bIsLanQuery = true;
+		SessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+		SessionInterface->FindSessions(0, SessionSearch.ToSharedRef());
+	}
 }
